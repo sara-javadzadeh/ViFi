@@ -64,19 +64,23 @@ parser.add_argument('--prefix', dest='prefix',
                     action='store', type=str)
 parser.add_argument('--max_size_fraction', dest='max_size',
                     help="Maximum fraction of total size to decompose (default=.10)", metavar='MAX_SIZE', default = 0.10,
-                    action='store', type=int)
+                    action='store', type=float)
 parser.add_argument('--keep_alignment', dest='keep_alignment',
-                    help="Keep temporary ", default = False,
-                    action='store', type=bool)
+                    help="Keep temporary alignment files for each HMM", default = False,
+                    action='store_true')
 parser.add_argument('--decomposition', dest='decomposition',
                     help="Decomposition strategy:standard, hierarchical (default=hierarchical)", default = 'hierarchical',
                     action='store', type=str)
 
 arg = parser.parse_args()
 tree = Tree.get(file=open(arg.tree_file, 'r'), schema="newick", preserve_underscores=True)
+#print("tree:\n{}".format(Tree.get_from_string(tree.as_string(schema="newick"), "newick").as_ascii_plot()))
 tree_map = {}
-print "Decomposing Tree"
+print "Decomposing Tree of size %d" % len(tree.leaf_nodes())
 max_size = max(10, int(arg.max_size*len(tree.leaf_nodes())))
+print "Decomposing tree with max_size %d" % max_size
 decompose_tree(tree, max_size, tree_map = tree_map, decomposition=arg.decomposition)
+print "Tree decomposed into %d subtrees" % len(tree_map.keys())
+print("tree map: {}".format([(key, value.as_string(schema="newick")) for (key, value) in tree_map.iteritems()]))
 print "Building HMMs"
 build_hmms(tree_map, arg.alignment_file, arg.output_dir, arg.prefix, arg.keep_alignment)

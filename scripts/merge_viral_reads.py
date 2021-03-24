@@ -8,17 +8,15 @@ from collections import Counter
 from distutils.version import LooseVersion
 
 
-from sets import Set
-
 def is_float(value):
-  try: 
+  try:
     float(value)
     return True
   except ValueError:
     return False
-    
+
 def read_scores_file(hmm_file):
-  input = open(hmm_file, 'r')  
+  input = open(hmm_file, 'r')
   scores = dict()
   for line in input:
     results = line.strip().split(',')
@@ -27,11 +25,11 @@ def read_scores_file(hmm_file):
   return scores
 
 def read_map(map_file, scores, delimiter = '\t', direction = 'reverse'):
-  input = open(map_file, 'r')  
+  input = open(map_file, 'r')
   map = dict()
   for line in input:
-    results = line.strip().split(delimiter)    
-    if results[1] in scores:      
+    results = line.strip().split(delimiter)
+    if results[1] in scores:
       results[0] = results[0].replace('/1','').replace('/2','').replace('@','')
       if results[0] in map and map[results[0]][2] < scores[results[1]][2]:
         map[results[0]] = scores[results[1]]
@@ -54,7 +52,7 @@ parser.add_argument(
   type=str,
   nargs=1,
   )
-  
+
 
 parser.add_argument(
   '--unknown',
@@ -76,7 +74,7 @@ parser.add_argument(
   default=0.01,
   )
 
-  
+
 parser.add_argument(
   '--reduced',
   dest='reducedName',
@@ -96,7 +94,7 @@ parser.add_argument(
   type=str,
   nargs=1,
   )
-  
+
 parser.add_argument(
   '--output',
   dest='outputName',
@@ -110,13 +108,28 @@ args = parser.parse_args()
 
 transFile = pysam.Samfile(args.transName[0], 'rb')
 
+# Add a reference to the samfile for each hmm used in scores.
+hmm_references = []
+num_non_hmm_refs = None
+scores = read_scores_file(args.reducedName[0])
+hmm_indices_with_mapped_reads = list(set([int(score[3]) for score in scores.values()]))
+for hmm_index in hmm_indices_with_mapped_reads:
+  ref_name = 'viral_hmm_{}'.format(str(hmm_index))
+  ref_len = 8000
+  hmm_references.append({'LN': ref_len, 'SN': ref_name})
+
 #Hack to deal with pysam 0.14 or greater not being able to edit headers
 if LooseVersion(pysam.__version__) <= LooseVersion("0.13.0"):
-  references = transFile.header  
-  references['SQ'].append({'LN': 5000, 'SN': 'viral_hmm'})
+  references = transFile.header
+  num_non_hmm_refs = len(references['SQ'])
+  for ref in hmm_references:
+      references['SQ'].append(ref)
 else:
   references = transFile.header.to_dict()
-  references['SQ'].append({'LN': 5000, 'SN': 'viral_hmm'})
+  num_non_hmm_refs = len(references['SQ'])
+  for ref in hmm_references:
+      references['SQ'].append(ref)
+
   outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
   outputFile.close()
   os.system('samtools reheader %s %s > %s.fixed' % (args.outputName[0], args.unknownName[0], args.unknownName[0]))
@@ -125,24 +138,20 @@ else:
 
 unknownFile = pysam.Samfile(args.unknownName[0], 'rb')
 outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
-scores = read_scores_file(args.reducedName[0])
-mapping = read_map(args.mapName[0], scores)  
+mapping = read_map(args.mapName[0], scores)
 for read in unknownFile.fetch(until_eof=True):
-  if read.qname in mapping and mapping[read.qname][1] < args.threshold:
-    if read.is_unmapped:      
-      read.tid = len(references['SQ'])-1
+  # Note: threshold is set and checked in run_hmms.py through nhmmer internal tools.
+  if read.qname in mapping:
+    read_or_mate_tid = num_non_hmm_refs + hmm_indices_with_mapped_reads.index(mapping[read.qname][3])
+    if read.is_unmapped:
+      read.tid = read_or_mate_tid
       read.is_unmapped = False
-      read.pos = 1      
+      read.pos = mapping[read.qname][4]
       read.cigartuples = [(0,read.qlen)]
-#       matched = int(abs(mapping[read.qname][6]-mapping[read.qname][5]))+1
-#       if matched == read.qlen:
-#         read.cigartuples = [(0,matched)]
-#       else:
-#         read.cigartuples = [(0,matched),(4,read.qlen-matched)]
     else:
       read.mate_is_unmapped = False
-      read.mpos = 1      
-      read.mrnm = len(references['SQ'])-1
+      read.mpos = mapping[read.qname][4]
+      read.mrnm = read_or_mate_tid
     outputFile.write(read)
 
 for read in transFile.fetch(until_eof=True):

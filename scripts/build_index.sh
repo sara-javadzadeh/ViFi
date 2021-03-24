@@ -8,8 +8,11 @@ mkdir -p $OUTPUT_DIR
 OUTPUT_DIR=`realpath $OUTPUT_DIR`
 
 #Create hg19+virus fasta file
-cat $AA_DATA_REPO//hg19/hg19full.fa $INPUT_FASTA > $REFERENCE_REPO/$PREFIX/hg19_${PREFIX}.fas
+HUMAN_REF="grch38"
+HUMAN_REF_FILE_NAME="hg38full.fa"
+HUMAN_REF_DIR="GRCh38"
+cat $AA_DATA_REPO//${HUMAN_REF_DIR}/${HUMAN_REF_FILE_NAME} $REFERENCE_REPO/${virus}/${virus}.unaligned.fas > $REFERENCE_REPO/${virus}/${HUMAN_REF}_${virus}.fas
 
 #Build index
-docker run -v $REFERENCE_REPO/$PREFIX/:/home/$PREFIX/ docker.io/namphuon/vifi bwa index /home/$PREFIX/hg19_${PREFIX}.fas
+docker run -v $REFERENCE_REPO/$PREFIX/:/home/$PREFIX/ docker.io/namphuon/vifi bwa index /home/$PREFIX/${HUMAN_REF}_${PREFIX}.fas
 
