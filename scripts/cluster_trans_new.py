@@ -32,7 +32,7 @@ parser.add_argument(
 
 parser.add_argument('--min-support', dest="min_support",
                     help="Minimum number of reads to support an integration cluster for ViFi to recognize and report the cluster.",
-                    default=3, type=int)
+                    default=4, type=int)
 
 args = parser.parse_args()
 bamFile = pysam.Samfile(args.dataName[0], 'rb')
@@ -242,6 +242,8 @@ for ci in range(len(clusterList)):
         vplist.sort(lambda x, y: y[1] - x[1])
         frbin[cs] += 1
         outFile.write("##==========================================================================================================================================================================================================================\n")
+        outFile.write('\t'.join(map(str, [bamFile.getrname(c[0].tid), c[0].pos, c[-1].pos + c[-1].infer_query_length(), len(Set([a.qname for a in c])), cs[0], cs[1]])) + '\n')
+
         for a in c:
                 outFile.write('##' + '\t'.join(map(str, [a.qname, bamFile.getrname(a.tid), a.pos, not a.is_reverse, a.is_read1])) + '\n')
         for v in vcount:

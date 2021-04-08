@@ -178,16 +178,16 @@ for a in bamFile:
             continue
           #print("writing in condition #2: {} is_read1: {}".format(b.qname, b.is_read1))
           unknownFile.write(b)
-      else:
-        # Write the queries that are mapped to human genome with a large soft clip and might be viral.
-        for read in q1aligns + q2aligns:
-          # This excludes alignments with soft clips larger than 80% of the read length.
-          num_mapped_bases = len(read.query_alignment_qualities)
-          if num_mapped_bases < 0.2 * read.query_length:
-            seq = Counter(q1aligns[0].seq + q2aligns[0].seq)
-            if 'N' in seq and seq['N'] >= 5:
-              continue
-            unknownFile.write(read)
+      #else:
+      #  # Write the queries that are mapped to human genome with a large soft clip and might be viral.
+      #  for read in q1aligns + q2aligns:
+      #    # This excludes alignments with soft clips larger than 80% of the read length.
+      #    num_mapped_bases = len(read.query_alignment_qualities)
+      #    if num_mapped_bases < 0.2 * read.query_length:
+      #      seq = Counter(q1aligns[0].seq + q2aligns[0].seq)
+      #      if 'N' in seq and seq['N'] >= 5:
+      #        continue
+      #      unknownFile.write(read)
 
   if a.qname != qname:
     qname = a.qname

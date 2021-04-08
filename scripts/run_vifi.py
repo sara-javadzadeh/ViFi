@@ -27,7 +27,6 @@ def parse_args():
   runningOptions = parser.add_argument_group('Running options')
   runningOptions.add_argument('-v', '--virus', default="hpv",
                       help='''VIRUS model to use.  (default: hpv)''')
-  runningOptions = parser.add_argument_group('Running options')
   runningOptions.add_argument('--docker', action='store_true',
                       help='''Run via docker''')
   runningOptions.add_argument('-k', '--kmer_length', type=int, default=19,
