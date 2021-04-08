@@ -1,21 +1,18 @@
+#!/bin/bash
+
 VIFI_DIR=`pwd`
 
 #Get data repos
 if [ ! -d "data_repo" ]; then
     echo "Downloading the data_repo"
-    # TODO: Put the link to the updated data repo.
-    #wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
-    #perl gdown.pl "https://drive.google.com/open?id=0ByYcg0axX7udUDRxcTdZZkg0X1k" data_repo.tar.gz
-    tar -zxf data_repo.tar.gz
-    #rm data_repo.tar.gz
+    wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
+    perl gdown.pl "https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing" data_repo.tar.gz
+    tar -zxvf data_repo.tar.gz
+    rm data_repo.tar.gz
 fi
 if [ ! -d "viral_data" ]; then
-    echo "Downloading the HMM models"
-    # TODO: Put the link to the updated viral references.
-    #perl gdown.pl "https://drive.google.com/open?id=0Bzp6XgpBhhghSTNMd3RWS2VsVXM" viral_data.zip
-    #unzip viral_data.zip
+    echo "Uncompressing the HMM models"
     tar -xzvf viral_data.tar.gz
-    #rm viral_data.tar.gz
 fi
 
 #Set up environmental variables
