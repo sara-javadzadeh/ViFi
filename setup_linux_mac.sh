@@ -34,6 +34,7 @@ docker pull docker.io/namphuon/vifi
 #Set up reference for alignment
 HUMAN_REF="GRCh38"
 HUMAN_REF_FILE_NAME="hg38full.fa"
+#for virus in "hpv_655" "hbv_2012"; do
 for virus in "hpv" "hbv" "hcv" "ebv"; do
     HUMAN_VIRAL_REF="grch38_${virus}.fas"
     echo "Building the ${HUMAN_REF}+${virus} reference"

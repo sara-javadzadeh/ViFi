@@ -8,6 +8,15 @@ from collections import Counter
 
 from sets import Set
 
+def valid_alignment(read, sensitive):
+  if not sensitive:
+    return True
+  num_mapped_bases = len(read.query_alignment_qualities)
+  if num_mapped_bases < 0.2 * read.query_length:
+    return False
+  return True
+
+
 parser = \
   argparse.ArgumentParser(description='Extract reads with one end mapping to hg19 reference and other end mapping to viral genome'
               )
@@ -71,6 +80,14 @@ parser.add_argument(
   action='store',
   type=str,
   nargs=1,
+  )
+
+parser.add_argument(
+  '--sensitive',
+  dest='sensitive',
+  help='Sensitive setting, running hmms on reads with substantial softclips after bwa mem alignment. This option will increase the runtime of ViFi.[False]',
+  default=False,
+  action='store_true',
   )
 
 parser.add_argument(
@@ -157,7 +174,11 @@ for a in bamFile:
       for b in q1aligns + q2aligns:
     	#print("Writing into viralFile")
     	#print("viralReads: ", viralReads)
-        viralFile.write(b)
+        if valid_alignment(b, opts.sensitive):
+          viralFile.write(b)
+        else:
+          unknownFile.write(b)
+
     if viral == False and trans == False:
       #At least one read maps to human and at least one read is unmapped.
       if ((len([read for read in q1aligns if not read.is_unmapped and bamFile.references[read.tid] in chrom_list['human']]) +
@@ -178,16 +199,15 @@ for a in bamFile:
             continue
           #print("writing in condition #2: {} is_read1: {}".format(b.qname, b.is_read1))
           unknownFile.write(b)
-      #else:
-      #  # Write the queries that are mapped to human genome with a large soft clip and might be viral.
-      #  for read in q1aligns + q2aligns:
-      #    # This excludes alignments with soft clips larger than 80% of the read length.
-      #    num_mapped_bases = len(read.query_alignment_qualities)
-      #    if num_mapped_bases < 0.2 * read.query_length:
-      #      seq = Counter(q1aligns[0].seq + q2aligns[0].seq)
-      #      if 'N' in seq and seq['N'] >= 5:
-      #        continue
-      #      unknownFile.write(read)
+      else:
+        # Write the queries that are mapped to human genome with a large soft clip and might be viral.
+        for read in q1aligns + q2aligns:
+          # This allows us to consider alignments with substantial soft clips as unmapped.
+          if not valid_alignment(read, opts.sensitive):
+            seq = Counter(q1aligns[0].seq + q2aligns[0].seq)
+            if 'N' in seq and seq['N'] >= 5:
+                continue
+            unknownFile.write(read)
 
   if a.qname != qname:
     qname = a.qname
@@ -233,7 +253,10 @@ if trans == True:
 if viral == True:
   viralReads += 1
   for b in q1aligns + q2aligns:
-    viralFile.write(b)
+    if valid_alignment(b, opts.sensitive):
+      viralFile.write(b)
+    else:
+      unknownFile.write(b)
 if viral == False and trans == False:
   #At least one read maps to human and at least one read is unmapped.
   if ((len([read for read in q1aligns if not read.is_unmapped and bamFile.references[read.tid] in chrom_list['human']]) +

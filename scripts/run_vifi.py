@@ -29,8 +29,8 @@ def parse_args():
                       help='''VIRUS model to use.  (default: hpv)''')
   runningOptions.add_argument('--docker', action='store_true',
                       help='''Run via docker''')
-  runningOptions.add_argument('-k', '--kmer_length', type=int, default=19,
-                      help='''K-mer length for BWA mem. Default in BWA mem as well as in this program are 19.''')
+  runningOptions.add_argument('--sensitive', action='store_true', default=False,
+                      help='''Sensitive setting, running hmms on reads with substantial softclips after bwa mem alignment. This option will increase the runtime of ViFi.[False]''')
   runningOptions.add_argument('--threshold', type=float, default=0.02,
                       help='''Threshold for including reads in HMM computations. See ViFi/scripts/run_hmms.py.''')
   runningOptions.add_argument('--min-support', default=4, type=int,
@@ -84,7 +84,7 @@ def parse_args():
       parser.error('Unable to find %s' % (options.chromosome_list))
     else:
       chromosome_dir = os.path.dirname(os.path.realpath(options.chromosome_list))
-      chromosome = os.path.basename(options.chromosome_list) 
+      chromosome = os.path.basename(options.chromosome_list)
       input_string+= "-v %s:%s -e CHROMOSOME=%s " % (chromosome_dir, '/home/chromosomes/', os.path.basename(options.chromosome))
       vifi_string+= "-C /home/chromosomes/%s " % (os.path.basename(options.chromosome))
   if options.hmm_list is not None:
@@ -106,6 +106,8 @@ def parse_args():
       docker_reference = default_reference.replace('<VIRUS>', options.virus)
       input_string+= "-v %s:%s " % (os.path.dirname(options.reference), os.path.dirname(docker_reference))
       vifi_string+= "--reference %s " % (docker_reference)
+  if options.sensitive:
+    vifi_string+= "--sensitive "
   input_string+= "-v %s:/home/repo/data " % options.viral_reference_dir
   input_string+= "-v %s:/home/output/  -e REFERENCE_REPO=/home/repo/data "  % (os.path.realpath(options.output_dir))
   input_string+= "-v %s:/home/data_repo/ " % options.hg_data_dir
@@ -116,7 +118,7 @@ def parse_args():
   input_string+= "-v %s/scripts/merge_viral_reads.py:/home/scripts/merge_viral_reads.py " % options.vifi_dir
   vifi_string+= "--virus %s " % (options.virus)
   vifi_string+= "-c %d " % (options.cpus)
-  vifi_string+= "-k %d " % (options.kmer_length)
+  #vifi_string+= "-k %d " % (options.kmer_length)
   vifi_string+= "--threshold %f " % (options.threshold)
   vifi_string+= "-o /home/output/ -p %s " % (options.prefix)
   options.cmd_string = 'docker run %s docker.io/namphuon/vifi python "scripts/run_vifi.py" %s' % (input_string, vifi_string)
@@ -164,8 +166,11 @@ if __name__ == '__main__':
 
   #Identify transitive reads
   os.chdir(options.output_dir)
-  print( "[Identifying chimeric reads]: %f" % (time.time()-start_time)  )
-  os.system("python %s/scripts/get_trans_new.py --misc %s/%s.misc.bam --unknown %s/%s.unknown.bam --data %s --trans %s/%s.trans.bam --viral %s/%s.viral.bam %s" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, options.bamfile, options.output_dir, options.prefix, options.output_dir, options.prefix, "" if options.chromosome_list is None else "--chrom %s" % options.chromosome_list))
+  print( "[Identifying chimeric reads]: %f" % (time.time()-start_time))
+  command = "python %s/scripts/get_trans_new.py --misc %s/%s.misc.bam --unknown %s/%s.unknown.bam --data %s --trans %s/%s.trans.bam --viral %s/%s.viral.bam %s" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, options.bamfile, options.output_dir, options.prefix, options.output_dir, options.prefix, "" if options.chromosome_list is None else "--chrom %s" % options.chromosome_list)
+  if options.sensitive:
+    command += " --sensitive"
+  os.system(command)
   print( "[Finished identifying chimeric reads]: %f" % (time.time()-start_time)  )
 
 
