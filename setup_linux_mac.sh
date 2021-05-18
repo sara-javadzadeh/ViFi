@@ -34,18 +34,20 @@ docker pull docker.io/namphuon/vifi
 #Set up reference for alignment
 HUMAN_REF="GRCh38"
 HUMAN_REF_FILE_NAME="hg38full.fa"
-#for virus in "hpv_655" "hbv_2012"; do
-for virus in "hpv" "hbv" "hcv" "ebv"; do
-    HUMAN_VIRAL_REF="grch38_${virus}.fas"
-    echo "Building the ${HUMAN_REF}+${virus} reference"
-    cat $AA_DATA_REPO//${HUMAN_REF}/${HUMAN_REF_FILE_NAME} $REFERENCE_REPO/${virus}/${virus}.unaligned.fas > $REFERENCE_REPO/${virus}/${HUMAN_VIRAL_REF}
-    docker run -v $REFERENCE_REPO/${virus}/:/home/${virus}/ docker.io/namphuon/vifi bwa index /home/${virus}/${HUMAN_VIRAL_REF}
+for virus in "hpv" "hbv" "hcv" "ebv" "hpv_655"; do
+    if [ ! -d $REFERENCE_REPO/${virus} ]; then
+        echo "Reference for virus $virus is not downloaded. Contact the author to get access to the viral references."
+    else
+        HUMAN_VIRAL_REF="grch38_${virus}.fas"
+        echo "Building the ${HUMAN_REF}+${virus} reference"
+        cat $AA_DATA_REPO//${HUMAN_REF}/${HUMAN_REF_FILE_NAME} $REFERENCE_REPO/${virus}/${virus}.unaligned.fas > $REFERENCE_REPO/${virus}/${HUMAN_VIRAL_REF}
+        docker run -v $REFERENCE_REPO/${virus}/:/home/${virus}/ docker.io/namphuon/vifi bwa index /home/${virus}/${HUMAN_VIRAL_REF}
 
-    #Build reduced list of HMMs for testing
-    echo "building the list of hmms for testing in $VIFI_DIR"
-    ls $VIFI_DIR/viral_data/${virus}/hmms/*.hmmbuild > $VIFI_DIR/viral_data/${virus}/hmms/hmms.txt
-    ls $VIFI_DIR/viral_data/${virus}/hmms/*.[0-9].hmmbuild > $VIFI_DIR/viral_data/${virus}/hmms/partial_hmms.txt
-
+        #Build reduced list of HMMs for testing
+        echo "Creating the list of hmms for testing in $VIFI_DIR"
+        ls $VIFI_DIR/viral_data/${virus}/hmms/*.hmmbuild > $VIFI_DIR/viral_data/${virus}/hmms/hmms.txt
+        ls $VIFI_DIR/viral_data/${virus}/hmms/*.[0-9].hmmbuild > $VIFI_DIR/viral_data/${virus}/hmms/partial_hmms.txt
+    fi
 done
 
 #Run ViFi under docker mode on HPV test dataset on reduced HMM list set
