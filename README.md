@@ -4,6 +4,8 @@ ViFi is a tool for detecting viral integration and fusion mRNA sequences from Ne
 
 ViFi is currently in alpha testing, is is constantly undergoing revisions.  High on the priority list is an easier installation process, as well as improve user interface.  Please report any problems/bugs to Nam Nguyen (ndn006@eng.ucsd.edu) so that ViFi can be improved and problems can be quickly corrected.  
 
+The human reference dataset is updated in this forked repository as the original human reference was not accessible anymore. The updated human reference is based on hg38 assembly and is directly adapted from the Amplicon Architect project accessible at https://github.com/virajbdeshpande/AmpliconArchitect.
+
 ## ***UPDATE****
 
 Due to major issues with incompatibilities between versions of Pysam and Samtools, Python versions, as well as issues with software compatibility between different platforms, we highly recommend that users  discontinue the use the Python version of ViFi, and instead, use the Dockerized version of ViFi.  The Dockerized version is platform independent and only requires Python (either version 2.7 or 3.0) and Docker to be installed, and no other software package is needed.  We outline below how to set up and install the Dockerized version, and how to run the Dockerized version.  
