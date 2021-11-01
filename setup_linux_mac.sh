@@ -1,11 +1,13 @@
-#!/bin/bash
+#Get ViFi
+git clone https://github.com/sara-javadzadeh/ViFi.git
+cd ViFi
 
 VIFI_DIR=`pwd`
 
 #Get data repos
 if [ ! -d "data_repo" ]; then
     echo "Downloading the data_repo"
-    wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
+    wget "https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl"
     perl gdown.pl "https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing" data_repo.tar.gz
     tar -zxvf data_repo.tar.gz
     rm data_repo.tar.gz
@@ -13,6 +15,7 @@ fi
 if [ ! -d "viral_data" ]; then
     echo "Uncompressing the HMM models"
     tar -xzvf viral_data.tar.gz
+    rm viral_data.tar.gz
 fi
 
 #Set up environmental variables
