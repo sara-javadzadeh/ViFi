@@ -31,7 +31,7 @@ hg19+HPV via Docker, and run a test run of ViFi via Docker.  It can take up to a
 set of tests to complete and run.  Make sure you have at least 10 Gb of space free for the process to complete.
 
 ```
-wget https://raw.githubusercontent.com/namphuon/ViFi/master/setup_linux_mac.sh
+wget https://raw.githubusercontent.com/sara-javadzadeh/ViFi/master/setup_linux_mac.sh
 sh setup_linux_mac.sh
 ```
   
@@ -39,7 +39,7 @@ Run steps 3-7 are only necessary if Perl is not installed on the machine or on W
 
 3. Clone the ViFi repository
 ```
-git clone https://github.com/namphuon/ViFi.git
+git clone https://github.com/sara-javadzadeh/ViFi.git
 ```
 
 4. Set the ViFi directory and include the python source to your Python path
@@ -48,17 +48,19 @@ echo export VIFI_DIR=/path/to/ViFi >> ~/.bashrc
 echo export PYTHONPATH=/path/to/ViFi:/path/to/ViFi/src:$PYTHONPATH >> ~/.bashrc
 ```
 5. Download the data repositories:
-While we include some annotations, we are unable to host some large files in the git repository.  These may be downloaded from https://drive.google.com/open?id=0ByYcg0axX7udUDRxcTdZZkg0X1k. Thanks to Peter Ulz for noticing incorrect link earlier.
+While we include some annotations, we are unable to host some large files in the git repository. These may be downloaded from https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
 ```
-tar zxf data_repo.tar.gz
+tar -zxvf data_repo.tar.gz
+echo "GRCh38" > ./data_repo/reference.txt
 echo export AA_DATA_REPO=$PWD/data_repo >> ~/.bashrc
 source ~/.bashrc
 ```
 6. Download the HMM models:
-We have pre-build HMM models for HPV and HBV.  They can be downloaded from https://drive.google.com/open?id=0Bzp6XgpBhhghSTNMd3RWS2VsVXM.
+We have pre-build HMM models for HPV, HBV, HCV and EBV.  They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1VB0qNHRM--CLgZAMmn8sFcNqjzE7QbCn/view?usp=sharing.
 ```
-unzip data.zip
-echo export REFERENCE_REPO=$PWD/data >> ~/.bashrc
+tar -zxvf viral_data.tar.gz
+echo export REFERENCE_REPO=$PWD/viral_data >> ~/.bashrc
+source ~/.bashrc
 ```
 7.  Build a BWA index on the reference sequences from human+viral sequences:
 We show an example of building an index of human+viral sequences using Hg19 and **HPV** and **HBV** below.  However
@@ -189,7 +191,7 @@ We provide instructions for installing ViFi on Linux below.
 
 1. ViFi download (if you have not already cloned this source code):
 ```
-git clone https://github.com/namphuon/ViFi.git
+git clone https://github.com/sara-javadzadeh/ViFi.git
 ```
 2. Install Dependencies:
    1. Python 2.7
@@ -218,17 +220,19 @@ echo export VIFI_DIR=/path/to/ViFi >> ~/.bashrc
 echo export PYTHONPATH=/path/to/ViFi:/path/to/ViFi/src:$PYTHONPATH >> ~/.bashrc
 ```
 4. Download the data repositories:
-While we include some annotations, we are unable to host some large files in the git repository.  These may be downloaded from https://drive.google.com/open?id=0ByYcg0axX7udUDRxcTdZZkg0X1k. Thanks to Peter Ulz for noticing incorrect link earlier.
+While we include some annotations, we are unable to host some large files in the git repository.  These may be downloaded from https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
 ```
-tar zxf data_repo.tar.gz
+tar -zxvf data_repo.tar.gz
+echo "GRCh38" > ./data_repo/reference.txt
 echo export AA_DATA_REPO=$PWD/data_repo >> ~/.bashrc
 source ~/.bashrc
 ```
 5. Download the HMM models:
-We have pre-build HMM models for HPV and HBV.  They can be downloaded from https://drive.google.com/open?id=0Bzp6XgpBhhghSTNMd3RWS2VsVXM.
+We have pre-build HMM models for HPV, HBV, HCV and EBV. They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1VB0qNHRM--CLgZAMmn8sFcNqjzE7QbCn/view?usp=sharing.
 ```
-unzip data.zip
-echo export REFERENCE_REPO=$PWD/data >> ~/.bashrc
+tar -zxvf viral_data.tar.gz
+echo export REFERENCE_REPO=$PWD/viral_data >> ~/.bashrc
+source ~/.bashrc
 ```
 6.  Build a BWA index on the reference sequences from human+viral sequences:
 We show an example of building an index of human+viral sequences using Hg19 and **HPV** and **HBV** below.  However
