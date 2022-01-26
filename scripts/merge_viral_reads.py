@@ -104,55 +104,69 @@ parser.add_argument(
   type=str,
   nargs=1,
   )
+
+parser.add_argument(
+  '--disable-hmms',
+  dest='disable_hmms',
+  help='Whether or not the HMMs are disabled',
+  action='store_true',
+  type=bool,
+  nargs=0,
+  default=False,
+  )
+
 args = parser.parse_args()
 
 transFile = pysam.Samfile(args.transName[0], 'rb')
 
-# Add a reference to the samfile for each hmm used in scores.
-hmm_references = []
-num_non_hmm_refs = None
-scores = read_scores_file(args.reducedName[0])
-hmm_indices_with_mapped_reads = list(set([int(score[3]) for score in scores.values()]))
-for hmm_index in hmm_indices_with_mapped_reads:
-  ref_name = 'viral_hmm_{}'.format(str(hmm_index))
-  ref_len = 8000
-  hmm_references.append({'LN': ref_len, 'SN': ref_name})
+if not args.disable_hmms:
+    # Add a reference to the samfile for each hmm used in scores.
+    hmm_references = []
+    num_non_hmm_refs = None
+    scores = read_scores_file(args.reducedName[0])
+    hmm_indices_with_mapped_reads = list(set([int(score[3]) for score in scores.values()]))
+    for hmm_index in hmm_indices_with_mapped_reads:
+      ref_name = 'viral_hmm_{}'.format(str(hmm_index))
+      ref_len = 8000
+      hmm_references.append({'LN': ref_len, 'SN': ref_name})
 
-#Hack to deal with pysam 0.14 or greater not being able to edit headers
-if LooseVersion(pysam.__version__) <= LooseVersion("0.13.0"):
-  references = transFile.header
-  num_non_hmm_refs = len(references['SQ'])
-  for ref in hmm_references:
-      references['SQ'].append(ref)
-else:
-  references = transFile.header.to_dict()
-  num_non_hmm_refs = len(references['SQ'])
-  for ref in hmm_references:
-      references['SQ'].append(ref)
+    #Hack to deal with pysam 0.14 or greater not being able to edit headers
+    if LooseVersion(pysam.__version__) <= LooseVersion("0.13.0"):
+      references = transFile.header
+      num_non_hmm_refs = len(references['SQ'])
+      for ref in hmm_references:
+          references['SQ'].append(ref)
+    else:
+      references = transFile.header.to_dict()
+      num_non_hmm_refs = len(references['SQ'])
+      for ref in hmm_references:
+          references['SQ'].append(ref)
 
-  outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
-  outputFile.close()
-  os.system('samtools reheader %s %s > %s.fixed' % (args.outputName[0], args.unknownName[0], args.unknownName[0]))
-  os.system('mv %s.fixed %s' % (args.unknownName[0], args.unknownName[0]))
+      outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
+      outputFile.close()
+      os.system('samtools reheader %s %s > %s.fixed' % (args.outputName[0], args.unknownName[0], args.unknownName[0]))
+      os.system('mv %s.fixed %s' % (args.unknownName[0], args.unknownName[0]))
 
 
 unknownFile = pysam.Samfile(args.unknownName[0], 'rb')
 outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
-mapping = read_map(args.mapName[0], scores)
-for read in unknownFile.fetch(until_eof=True):
-  # Note: threshold is set and checked in run_hmms.py through nhmmer internal tools.
-  if read.qname in mapping:
-    read_or_mate_tid = num_non_hmm_refs + hmm_indices_with_mapped_reads.index(mapping[read.qname][3])
-    if read.is_unmapped:
-      read.tid = read_or_mate_tid
-      read.is_unmapped = False
-      read.pos = mapping[read.qname][4]
-      read.cigartuples = [(0,read.qlen)]
-    else:
-      read.mate_is_unmapped = False
-      read.mpos = mapping[read.qname][4]
-      read.mrnm = read_or_mate_tid
-    outputFile.write(read)
+
+if not args.disable_hmms:
+    mapping = read_map(args.mapName[0], scores)
+    for read in unknownFile.fetch(until_eof=True):
+      # Note: threshold is set and checked in run_hmms.py through nhmmer internal tools.
+      if read.qname in mapping:
+        read_or_mate_tid = num_non_hmm_refs + hmm_indices_with_mapped_reads.index(mapping[read.qname][3])
+        if read.is_unmapped:
+          read.tid = read_or_mate_tid
+          read.is_unmapped = False
+          read.pos = mapping[read.qname][4]
+          read.cigartuples = [(0,read.qlen)]
+        else:
+          read.mate_is_unmapped = False
+          read.mpos = mapping[read.qname][4]
+          read.mrnm = read_or_mate_tid
+        outputFile.write(read)
 
 for read in transFile.fetch(until_eof=True):
   outputFile.write(read)

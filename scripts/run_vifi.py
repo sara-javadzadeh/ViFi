@@ -50,7 +50,7 @@ def parse_args():
   advOptions.add_argument('-C', '--chromosome_list',  dest='chromosome_list',  help='Optional file that contains list of chromosomes from reference organism.  All other sequences in the BAM file that are not in this list would be considered viral.  The file contains a single line with the space-delimited list of chromosomes belonging to the reference organism.  By default, the 23 full-length chromosomes from the human genome reference are considered human.',  metavar='FILE',  action='store',  type=str, default=None,)
   advOptions.add_argument('-l', '--hmm_list', default=None,
                       help='''List of HMMs to include in search, one HMM filename per line.  If running under Docker mode, all the hmms must be within the same folder as the hmm_list file.  Useful if user wants to search against customized list of HMMs (default: None)''')
-  advOptions.add_argument('-d', '--disable_hmms', default=False, type=bool,
+  advOptions.add_argument('-d', '--disable_hmms', default=False, action='store_true',
                       help='''Disabled use of HMMs in search.  Useful if user only wants to use reference-based mapping to detect integrations.''')
   options = parser.parse_args()
 
@@ -189,7 +189,10 @@ if __name__ == '__main__':
 
   #Cluster reads
   print( "[Cluster and identify integration points]: %f" % (time.time()-start_time))
-  os.system("python %s/scripts/merge_viral_reads.py --unknown %s/%s.unknown.bam --trans %s/%s.trans.bam --reduced tmp/temp/reduced.csv --map tmp/temp/unmapped.map --output %s/%s.fixed.trans.bam" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, options.output_dir, options.prefix))
+  other_args_for_merge = ""
+  if options.disable_hmms:
+    other_args_for_merge += " --disable-hmms"
+  os.system("python %s/scripts/merge_viral_reads.py --unknown %s/%s.unknown.bam --trans %s/%s.trans.bam --reduced tmp/temp/reduced.csv --map tmp/temp/unmapped.map --output %s/%s.fixed.trans.bam" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, options.output_dir, options.prefix) + other_args_for_merge)
 
   os.system("samtools sort -m 2G -@ %d %s/%s.fixed.trans.bam > %s/%s.fixed.trans.cs.bam" % (options.cpus, options.output_dir, options.prefix, options.output_dir, options.prefix))
   os.system("samtools index %s/%s.fixed.trans.cs.bam" % (options.output_dir, options.prefix))
