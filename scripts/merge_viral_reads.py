@@ -110,18 +110,16 @@ parser.add_argument(
   dest='disable_hmms',
   help='Whether or not the HMMs are disabled',
   action='store_true',
-  type=bool,
-  nargs=0,
-  default=False,
   )
 
 args = parser.parse_args()
 
 transFile = pysam.Samfile(args.transName[0], 'rb')
 
-if not args.disable_hmms:
+hmm_references = []
+count_hmms = (not args.disable_hmms) and os.path.exists(args.reducedName[0])
+if count_hmms:
     # Add a reference to the samfile for each hmm used in scores.
-    hmm_references = []
     num_non_hmm_refs = None
     scores = read_scores_file(args.reducedName[0])
     hmm_indices_with_mapped_reads = list(set([int(score[3]) for score in scores.values()]))
@@ -130,28 +128,30 @@ if not args.disable_hmms:
       ref_len = 8000
       hmm_references.append({'LN': ref_len, 'SN': ref_name})
 
-    #Hack to deal with pysam 0.14 or greater not being able to edit headers
-    if LooseVersion(pysam.__version__) <= LooseVersion("0.13.0"):
-      references = transFile.header
-      num_non_hmm_refs = len(references['SQ'])
-      for ref in hmm_references:
-          references['SQ'].append(ref)
-    else:
-      references = transFile.header.to_dict()
-      num_non_hmm_refs = len(references['SQ'])
-      for ref in hmm_references:
-          references['SQ'].append(ref)
+#Hack to deal with pysam 0.14 or greater not being able to edit headers
+if LooseVersion(pysam.__version__) <= LooseVersion("0.13.0"):
+  references = transFile.header
+  if count_hmms:
+    num_non_hmm_refs = len(references['SQ'])
+    for ref in hmm_references:
+      references['SQ'].append(ref)
+else:
+  references = transFile.header.to_dict()
+  if count_hmms:
+    num_non_hmm_refs = len(references['SQ'])
+    for ref in hmm_references:
+      references['SQ'].append(ref)
 
-      outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
-      outputFile.close()
-      os.system('samtools reheader %s %s > %s.fixed' % (args.outputName[0], args.unknownName[0], args.unknownName[0]))
-      os.system('mv %s.fixed %s' % (args.unknownName[0], args.unknownName[0]))
+  outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
+  outputFile.close()
+  os.system('samtools reheader %s %s > %s.fixed' % (args.outputName[0], args.unknownName[0], args.unknownName[0]))
+  os.system('mv %s.fixed %s' % (args.unknownName[0], args.unknownName[0]))
 
 
 unknownFile = pysam.Samfile(args.unknownName[0], 'rb')
 outputFile = pysam.Samfile(args.outputName[0], 'wb', header=references)
 
-if not args.disable_hmms:
+if count_hmms:
     mapping = read_map(args.mapName[0], scores)
     for read in unknownFile.fetch(until_eof=True):
       # Note: threshold is set and checked in run_hmms.py through nhmmer internal tools.

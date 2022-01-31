@@ -34,8 +34,10 @@ def run_pipeline(options):
     os.mkdir('%s/logs' % options.directory)
   if not os.path.exists('%s/temp' % options.directory):
     os.mkdir('%s/temp' % options.directory)
-  #if (not os.path.exists('%s/temp/unmapped.fas' % options.directory)) or (os.path.getsize('%s/temp/unmapped.fas' % options.directory) == 0):
   prepare_unmapped_sequences(options)
+  if (not os.path.exists('%s/temp/unmapped.fas' % options.directory)) or (os.path.getsize('%s/temp/unmapped.fas' % options.directory) == 0):
+    print "Exiting nhmmer step. No reads were reported as unmapped."
+    return
   #Now search HMMs against reads
   print "Running HMMs"
   start_time = time.time()
