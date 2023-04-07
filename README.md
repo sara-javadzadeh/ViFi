@@ -48,7 +48,7 @@ echo export VIFI_DIR=/path/to/ViFi >> ~/.bashrc
 echo export PYTHONPATH=/path/to/ViFi:/path/to/ViFi/src:$PYTHONPATH >> ~/.bashrc
 ```
 5. Download the data repositories:
-While we include some annotations, we are unable to host some large files in the git repository. These may be downloaded from https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
+While we include some annotations, we are unable to host some large files in the git repository. These may be downloaded from https://drive.google.com/file/d/1XBZbwgcV1n2AWWAyt2RWfSKKxzssRFBo/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
 ```
 tar -zxvf data_repo.tar.gz
 echo "GRCh38" > ./data_repo/reference.txt
