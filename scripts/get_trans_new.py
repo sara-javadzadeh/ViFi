@@ -135,17 +135,17 @@ for a in bamFile:
   if a.qname != qname and qname != '':
     if len([b for b in q1aligns if not b.is_secondary and not b.is_supplementary]) != 1 \
       or len([b for b in q2aligns if not b.is_secondary and not b.is_supplementary]) != 1:
-      print 'No primary alignment', a.qname
-      print [(b, str(b)) for b in q1aligns if not b.is_secondary]
-      print [(b, str(b)) for b in q2aligns if not b.is_secondary]
+      print('No primary alignment', a.qname)
+      print([(b, str(b)) for b in q1aligns if not b.is_secondary])
+      print([(b, str(b)) for b in q2aligns if not b.is_secondary])
       exit()
     trans = False
     viral = False
     unknown = False
     totalReads += 1
     if totalReads % 100000 == 0:
-      print clock(), totalReads, 'reads done: #(Trans reads) =', \
-        transReads, viralReads, a.qname, qname
+      print(clock(), totalReads, 'reads done: #(Trans reads) =', \
+        transReads, viralReads, a.qname, qname)
     len_q1ref = len(chrom_list['human'].intersection(q1ref))
     len_q2ref = len(chrom_list['human'].intersection(q2ref))
     if len_q1ref > 0 \
@@ -283,4 +283,4 @@ viralFile.close()
 unknownFile.close()
 if miscFile is not None:
   miscFile.close()
-print totalReads, transReads, viralReads
+print(totalReads, transReads, viralReads)

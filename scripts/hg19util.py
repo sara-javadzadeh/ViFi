@@ -460,7 +460,7 @@ class interval_list(list, object):
                 ci = a
                 cl = []
                 if ai != sum([len(m[1]) for m in ml]) + 1:
-                    print "divergent", ai, str(a)
+                    print("divergent", ai, str(a))
                     exit()
             ci = ci.merge(a, extend)
             cl.append(a)
@@ -471,7 +471,7 @@ class interval_list(list, object):
     def repeats(self, count=1):
         activeq = []
         if activeq is None:
-            print "h1"
+            print("h1")
             exit()
         jinterval = None
         ilist = []
@@ -479,12 +479,12 @@ class interval_list(list, object):
             while len(activeq) > 0 and not a.intersects(activeq[0][1]):
                 heapq.heappop(activeq)
                 if activeq is None:
-                    print "h2"
+                    print("h2")
                     exit()
             if len(activeq) < count and jinterval is not None:
                 ilist.append((jinterval, copy.copy(aq)))
                 if activeq is None:
-                    print "h3"
+                    print("h3")
                     exit()
                 jinterval = None
             heapq.heappush(activeq, (-1 * a.start, a))
@@ -575,7 +575,7 @@ class interval_list(list, object):
     def get_repeat_content(self):
         try:
             duke35_file = open(duke35_filename)
-            print "counting repeats", clock()
+            print("counting repeats", clock())
             self.sort()
             sum_duke = [0.0 for i in self]
             len_duke = [0.0 for i in self]
@@ -688,7 +688,7 @@ class interval_list(list, object):
                 continue
             if i in hlist and iprev.chrom == i.chrom:
                 breaks.append((offset[i][0] - hscale * hgap / 2, ':', i.chrom))
-                print str(i), str(iprev), i in hlist, iprev.chrom == i.chrom
+                print(str(i), str(iprev), i in hlist, iprev.chrom == i.chrom)
             elif i in hlist and iprev.chrom != i.chrom:
                 breaks.append((offset[i][0] - hscale * hgap / 2, '--', i.chrom))
             elif i in vlist and iprev in hlist:

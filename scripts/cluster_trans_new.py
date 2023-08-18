@@ -253,4 +253,4 @@ for ci in range(len(clusterList)):
 outFile.close()
 bamFile.close()
 rangeFile.close()
-print len(clusterList)
+print(len(clusterList))

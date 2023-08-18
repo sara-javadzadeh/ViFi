@@ -76,11 +76,11 @@ arg = parser.parse_args()
 tree = Tree.get(file=open(arg.tree_file, 'r'), schema="newick", preserve_underscores=True)
 #print("tree:\n{}".format(Tree.get_from_string(tree.as_string(schema="newick"), "newick").as_ascii_plot()))
 tree_map = {}
-print "Decomposing Tree of size %d" % len(tree.leaf_nodes())
+print("Decomposing Tree of size %d" % len(tree.leaf_nodes()))
 max_size = max(10, int(arg.max_size*len(tree.leaf_nodes())))
-print "Decomposing tree with max_size %d" % max_size
+print("Decomposing tree with max_size %d" % max_size)
 decompose_tree(tree, max_size, tree_map = tree_map, decomposition=arg.decomposition)
-print "Tree decomposed into %d subtrees" % len(tree_map.keys())
+print("Tree decomposed into %d subtrees" % len(tree_map.keys()))
 print("tree map: {}".format([(key, value.as_string(schema="newick")) for (key, value) in tree_map.iteritems()]))
-print "Building HMMs"
+print("Building HMMs")
 build_hmms(tree_map, arg.alignment_file, arg.output_dir, arg.prefix, arg.keep_alignment)

@@ -36,14 +36,14 @@ def run_pipeline(options):
     os.mkdir('%s/temp' % options.directory)
   prepare_unmapped_sequences(options)
   if (not os.path.exists('%s/temp/unmapped.fas' % options.directory)) or (os.path.getsize('%s/temp/unmapped.fas' % options.directory) == 0):
-    print "Exiting nhmmer step. No reads were reported as unmapped."
+    print("Exiting nhmmer step. No reads were reported as unmapped.")
     return
   #Now search HMMs against reads
-  print "Running HMMs"
+  print("Running HMMs")
   start_time = time.time()
   for i in hmms.keys():
     start_time_for_each_hmm = time.time()
-    print "\tRunning HMM %s" % hmms[i]
+    print("\tRunning HMM %s" % hmms[i])
     # --noali is to indicate that alignments are not specified in output to reduce output volume
     # --incE Use an E-value of <= <x> as the inclusion threshold.
     # The default is 0.01, meaning that on average, about 1 false positive
@@ -52,10 +52,10 @@ def run_pipeline(options):
     print(command)
     os.system(command)
     duration_time = time.time() - start_time_for_each_hmm;
-    print "Finished running against HMMs %s: %fs" % (hmms[i], duration_time)
+    print("Finished running against HMMs %s: %fs" % (hmms[i], duration_time))
   end_time = time.time() - start_time;
-  print "Finished running against HMMs: %fs" % end_time
-  print "Processing results\n";
+  print("Finished running against HMMs: %fs" % end_time)
+  print("Processing results\n")
   scores = {}
   # This is to store hmm ids that improved scores for some read
   for i in hmms.keys():
@@ -104,7 +104,7 @@ def prepare_unmapped_sequences(options):
   map.close()
   bam.close()
   end_time = time.time() - start_time;
-  print "Prepared sequences for searching against HMMs: %fs" % end_time
+  print("Prepared sequences for searching against HMMs: %fs" % end_time)
 
 if __name__ == '__main__':
   start_time = time.time()
