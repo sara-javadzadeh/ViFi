@@ -6,7 +6,6 @@ import pysam
 import argparse
 from time import clock
 from collections import defaultdict, Counter
-from sets import Set
 import re
 
 import hg19util as hg
@@ -38,7 +37,7 @@ args = parser.parse_args()
 bamFile = pysam.Samfile(args.dataName[0], 'rb')
 outFile = open(args.outputName[0], 'w')
 rangeFile = open(args.outputName[0] + ".range", 'w')
-hgrefs = Set(map(lambda x: 'chr' + str(x), range(1,23) + ['X', 'Y', 'M']) + map(str, range(1,23) +  ['X', 'Y']))
+hgrefs = set(map(lambda x: 'chr' + str(x), range(1,23) + ['X', 'Y', 'M']) + map(str, range(1,23) +  ['X', 'Y']))
 if args.chrom_list is not None:
   input = open(args.chrom_list[0], 'r')
   foo = [hgrefs.add(l) for l in input.next().strip().split(' ')]
@@ -136,7 +135,7 @@ def largest_clean_subset(clist):
 def clean_genomic_cluster (clist, min_support):
         fmax = -1
         rmin = -1
-        if len(clist) >= min_support and len(Set([a.qname for a in clist])) >= min_support:
+        if len(clist) >= min_support and len(set([a.qname for a in clist])) >= min_support:
                 return True
         return False
 
@@ -145,7 +144,7 @@ clusterList = []
 clist = []
 caln = None
 vlist = defaultdict(lambda: [], {})
-vreads = defaultdict(lambda: Set([]), {})
+vreads = defaultdict(lambda: set([]), {})
 
 for a in bamFile:
         vlist[(a.qname, a.is_read1)].append(a)
@@ -167,7 +166,7 @@ if caln is not None and (a.pos > caln.pos + 300 or caln.tid != a.tid) and clean_
 
 clusterList.sort(lambda x, y: hg.interval(bamFile.getrname(x[0].tid), x[0].pos, x[-1].pos + x[-1].infer_query_length()) > hg.interval(bamFile.getrname(y[0].tid), y[0].pos, y[-1].pos + y[-1].infer_query_length()))
 
-vsuper = {v: Set([v2 for v2 in vreads if v2 != v and len(vreads[v]) < len(vreads[v2]) and vreads[v].issubset(vreads[v2])]) for v in vreads}
+vsuper = {v: set([v2 for v2 in vreads if v2 != v and len(vreads[v]) < len(vreads[v2]) and vreads[v].issubset(vreads[v2])]) for v in vreads}
 vequaldict = {}
 vequal = []
 for v in vreads:
@@ -179,7 +178,7 @@ for v in vreads:
                         inserted = True
                         break
         if not inserted:
-                vset = (v, Set([v]))
+                vset = (v, set([v]))
                 vequal.append(vset)
                 vequaldict[v] = vset
 rangeFile.write('Chr,Min,Max,Split1,Split2\n')
@@ -191,7 +190,7 @@ for x in range(21):
 
 clusterSets = []
 for c in clusterList:
-        clusterSets.append(Set([a.qname for a in c]))
+        clusterSets.append(set([a.qname for a in c]))
 
 intersectionGraph = defaultdict(lambda: [], {})
 cluster_duke35 = [hg.interval(bamFile.getrname(c[0].tid), c[0].pos, c[-1].pos + c[-1].infer_query_length()).rep_content()
@@ -206,7 +205,7 @@ for ci in range(len(clusterList)):
         for a in c:
                 for a2 in vlist[(a.qname, not a.is_read1)]:
                         vcount[bamFile.getrname(a2.tid)].append(a2)
-        vrep = Set([v for v in vcount.keys() if len(Set([a.qname for a in vcount[v]])) >= min_support
+        vrep = set([v for v in vcount.keys() if len(set([a.qname for a in vcount[v]])) >= min_support
                     and len([a for a in vcount[v] if a.is_reverse]) > -1 and len([a for a in vcount[v] if not a.is_reverse]) > -1
                    ]
                   )
@@ -242,7 +241,7 @@ for ci in range(len(clusterList)):
         vplist.sort(lambda x, y: y[1] - x[1])
         frbin[cs] += 1
         outFile.write("##==========================================================================================================================================================================================================================\n")
-        outFile.write('\t'.join(map(str, [bamFile.getrname(c[0].tid), c[0].pos, c[-1].pos + c[-1].infer_query_length(), len(Set([a.qname for a in c])), cs[0], cs[1]])) + '\n')
+        outFile.write('\t'.join(map(str, [bamFile.getrname(c[0].tid), c[0].pos, c[-1].pos + c[-1].infer_query_length(), len(set([a.qname for a in c])), cs[0], cs[1]])) + '\n')
 
         for a in c:
                 outFile.write('##' + '\t'.join(map(str, [a.qname, bamFile.getrname(a.tid), a.pos, not a.is_reverse, a.is_read1])) + '\n')

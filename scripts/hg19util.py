@@ -44,7 +44,6 @@
 ##This is a suite to load hg19 genome, genes, exons, repeat content and perform operations on this genome, compare variants
 
 from bisect import bisect_left
-from sets import Set
 from collections import defaultdict
 from time import clock
 import pysam

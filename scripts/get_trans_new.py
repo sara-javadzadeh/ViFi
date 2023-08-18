@@ -6,8 +6,6 @@ import argparse
 from time import clock
 from collections import Counter
 
-from sets import Set
-
 def valid_alignment(read, sensitive):
   if not sensitive:
     return True
@@ -108,18 +106,18 @@ transFile = pysam.Samfile(opts.transName[0], 'wb', template=bamFile)
 viralFile = pysam.Samfile(opts.viralName[0], 'wb', template=bamFile)
 unknownFile = pysam.Samfile(opts.unknownName[0], 'wb', template=bamFile)
 chrom_list = {}
-foo = [chrom_list.setdefault('human' if ref.find('chr') == 0 else 'viral',Set()).add(ref) for ref in bamFile.references]
+foo = [chrom_list.setdefault('human' if ref.find('chr') == 0 else 'viral',set()).add(ref) for ref in bamFile.references]
 if opts.chrom_list is not None:
   chrom_list = {}
   input = open(opts.chrom_list[0], 'r')
-  [chrom_list.setdefault('human',Set()).add(l) for l in input.next().strip().split()]
+  [chrom_list.setdefault('human',set()).add(l) for l in input.next().strip().split()]
 miscFile = None
 if (opts.miscName is not None):
   miscFile = pysam.Samfile(opts.miscName[0], 'wb', template=bamFile)
 
 qname = ''
-q1ref = Set([])
-q2ref = Set([])
+q1ref = set([])
+q2ref = set([])
 q1aligns = []
 q2aligns = []
 
@@ -213,8 +211,8 @@ for a in bamFile:
     qname = a.qname
     q1aligns = []
     q2aligns = []
-    q1ref = Set([])
-    q2ref = Set([])
+    q1ref = set([])
+    q2ref = set([])
   if a.is_read1:
     q1aligns.append(a)
     if not a.is_unmapped and not a.mate_is_unmapped and a.tid != -1:
