@@ -127,7 +127,7 @@ def absPos(chrname, pos=0):
     cnum = chrNum(chrname)
     if chrNum(chrname) not in chrOffset:
         chrkeys = chrName.keys()
-        chrkeys.sort()
+        chrkeys = sorted(chrkeys)
         sumlen = sum([chrLen[c] for c in chrLen if c in chrOffset])
         for i in range(len(chrkeys)):
             if chrkeys[i] not in chrOffset:
@@ -343,7 +343,7 @@ class interval(object):
         # logging.info("#TIME " + '%.3f\t'%clock() + " rep_content: init ")
         if self.chrom == 'chrM' or self.chrom == 'MT':
             return 5.0
-        if self.chrom.strip('chr') not in map(str, range(1,23))+['X'+'Y']:
+        if self.chrom.strip('chr') not in list(map(str, range(1,23)))+['X'+'Y']:
             return 1.0
         s34 = interval(self.chrom, self.start, max(self.start, self.end - 34))
         # logging.info("#TIME " + '%.3f\t'%clock() + " rep_content: to load duke ")
@@ -369,7 +369,7 @@ class interval(object):
         numiter = 0
         while hi - lo > 1:
             numiter += 1
-            p = (hi + lo) / 2
+            p = int((hi + lo) / 2)
             ctime = clock()
             m = interval(duke35[p])
             ictime += clock() - ctime

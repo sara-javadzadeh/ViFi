@@ -171,7 +171,7 @@ if __name__ == '__main__':
   if options.sensitive:
     command += " --sensitive"
   os.system(command)
-  print( "[Finished identifying chimeric reads]: %f" % (time.time()-start_time)  )
+  print( "[Finished identifying and indexing chimeric reads]: %f" % (time.time()-start_time)  )
 
 
   #Run HMMs, either use default HMMs found in directory or use list of HMMs given by user.

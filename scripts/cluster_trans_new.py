@@ -37,7 +37,13 @@ args = parser.parse_args()
 bamFile = pysam.Samfile(args.dataName[0], 'rb')
 outFile = open(args.outputName[0], 'w')
 rangeFile = open(args.outputName[0] + ".range", 'w')
-hgrefs = set(map(lambda x: 'chr' + str(x), range(1,23) + ['X', 'Y', 'M']) + map(str, range(1,23) +  ['X', 'Y']))
+hgrefs = set(
+             list(map(
+                    lambda x: 'chr' + str(x),
+                    list(range(1,23)) + ['X', 'Y', 'M'])) +\
+             list(map(
+                    str,
+                    list(range(1,23)) +  ['X', 'Y'])))
 if args.chrom_list is not None:
   input = open(args.chrom_list[0], 'r')
   foo = [hgrefs.add(l) for l in input.next().strip().split(' ')]
@@ -164,7 +170,9 @@ for a in bamFile:
 if caln is not None and (a.pos > caln.pos + 300 or caln.tid != a.tid) and clean_genomic_cluster(clist, min_support):
         clusterList.append(clist)
 
-clusterList.sort(lambda x, y: hg.interval(bamFile.getrname(x[0].tid), x[0].pos, x[-1].pos + x[-1].infer_query_length()) > hg.interval(bamFile.getrname(y[0].tid), y[0].pos, y[-1].pos + y[-1].infer_query_length()))
+clusterList.sort(key=lambda x, y: \
+    hg.interval(bamFile.getrname(x[0].tid), x[0].pos, x[-1].pos + x[-1].infer_query_length()) > \
+    hg.interval(bamFile.getrname(y[0].tid), y[0].pos, y[-1].pos + y[-1].infer_query_length()))
 
 vsuper = {v: set([v2 for v2 in vreads if v2 != v and len(vreads[v]) < len(vreads[v2]) and vreads[v].issubset(vreads[v2])]) for v in vreads}
 vequaldict = {}

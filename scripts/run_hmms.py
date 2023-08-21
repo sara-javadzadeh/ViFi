@@ -65,15 +65,16 @@ def run_pipeline(options):
     output.write("%s\n" % (','.join([str(s) for s in scores[score]])))
   output.close()
 def read_nhmmer_result(file, hmm_index, scores):
-  input = open(file, 'r')
+  input_file = open(file, 'r')
+  input = iter(input_file.readlines())
   start_line = 'Query:'
   start = False
   for line in input:
     if start == False and line.find(start_line) == 0:
       start = True
-      foo = input.next()
-      foo = input.next()
-      foo = input.next()
+      foo = next(input)
+      foo = next(input)
+      foo = next(input)
     if start == True and line.find('read_') != -1:
       res = line.split()
       # line header: E-value    score   bias    Sequence    start   end     description
@@ -97,8 +98,10 @@ def prepare_unmapped_sequences(options):
   map = open('%s/temp/unmapped.map' % options.directory, 'wb')
 
   for read in bam:
-      fas.write('>read_%d\n%s\n' % (counter, read.seq))
-      map.write('%s\tread_%d\n' % (read.qname, counter))
+      fas_text = '>read_{}\n{}\n'.format(counter, read.seq)
+      fas.write(fas_text.encode())
+      map_text = '{}\tread_{}\n'.format(read.qname, counter)
+      map.write(map_text.encode())
       counter+=1
   fas.close()
   map.close()
