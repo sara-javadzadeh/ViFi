@@ -29,6 +29,8 @@ def parse_args():
                       help='''VIRUS model to use.  (default: hpv)''')
   runningOptions.add_argument('--docker', action='store_true',
                       help='''Run via docker''')
+  runningOptions.add_argument('--singularity', action='store_true',
+                      help='''Run via singularity''')
   runningOptions.add_argument('--sensitive', action='store_true', default=False,
                       help='''Sensitive setting, running hmms on reads with substantial softclips after bwa mem alignment. This option will increase the runtime of ViFi.[False]''')
   runningOptions.add_argument('--threshold', type=float, default=0.02,
@@ -36,7 +38,9 @@ def parse_args():
   runningOptions.add_argument('--min-support', default=4, type=int,
                     help="Minimum number of reads to support an integration cluster for ViFi to recognize and report the cluster[4].")
   runningOptions.add_argument('-c', '--cpus', default=1, type=int,
-                      help='''number of cpus (default: 1)''')
+                      help='''Number of cpus (default: 1)''')
+  runningOptions.add_argument('--mem', default="2G", type=str,
+                      help='''Max memory used in samtools sort (default: 2G)''')
   runningOptions.add_argument('--reference', default=default_reference, action='store', type=str,
                       help='''BWA reference (default: %s, VIRUS default is hpv)''' % default_reference)
   runningOptions.add_argument('--vifi_dir', default=default_vifi_dir, action='store', type=str,
@@ -98,14 +102,26 @@ def parse_args():
         input_string+= "-v %s:%s -e HMM_LIST=%s " % (hmm_list_dir, '/home/hmm_list/', os.path.basename(temp_list.name))
         vifi_string+= "-l /home/hmm_list/%s " % (os.path.basename(temp_list.name))
         options.temp_list = temp_list.name
+      if options.singularity == True:
+        temp_list = create_new_hmm_list(hmm_list_dir, hmm_list)
+        input_string+= "-v %s:%s -e HMM_LIST=%s " % (hmm_list_dir, '/home/hmm_list/', os.path.basename(temp_list.name))
+        vifi_string+= "-l /home/hmm_list/%s " % (os.path.basename(temp_list.name))
+        options.temp_list = temp_list.name
   if options.reference.find('<VIRUS>') == -1:
     if not os.path.exists(options.reference):
       parser.error('Unable to find %s' % (options.reference))
     else:
-      #Fix default reference
-      docker_reference = default_reference.replace('<VIRUS>', options.virus)
-      input_string+= "-v %s:%s " % (os.path.dirname(options.reference), os.path.dirname(docker_reference))
-      vifi_string+= "--reference %s " % (docker_reference)
+      if options.docker:
+          # Fix default reference for Docker
+          docker_reference = default_reference.replace('<VIRUS>', options.virus)
+          input_string+= "-v %s:%s " % (os.path.dirname(options.reference), os.path.dirname(docker_reference))
+          vifi_string+= "--reference %s " % (docker_reference)
+      if options.singularity:
+          # Fix default reference for Singularity
+          singularity_reference = default_reference.replace('<VIRUS>', options.virus)
+          input_string+= "-v %s:%s " % (os.path.dirname(options.reference), os.path.dirname(singularity_reference))
+          vifi_string+= "--reference %s " % (singularity_reference)
+
   if options.sensitive:
     vifi_string+= "--sensitive "
   input_string+= "-v %s:/home/repo/data " % options.viral_reference_dir
@@ -121,7 +137,10 @@ def parse_args():
   #vifi_string+= "-k %d " % (options.kmer_length)
   vifi_string+= "--threshold %f " % (options.threshold)
   vifi_string+= "-o /home/output/ -p %s " % (options.prefix)
-  options.cmd_string = 'docker run %s docker.io/namphuon/vifi python "scripts/run_vifi.py" %s' % (input_string, vifi_string)
+  if options.singularity:
+    options.cmd_string = 'singularity run %s docker.io/namphuon/vifi python "scripts/run_vifi.py" %s' % (input_string, vifi_string)
+  elif options.docker:
+    options.cmd_string = 'docker run %s docker.io/namphuon/vifi python "scripts/run_vifi.py" %s' % (input_string, vifi_string)
   return options
 
 def create_new_hmm_list(hmm_list_dir, hmm_list):
@@ -171,7 +190,7 @@ if __name__ == '__main__':
   if options.sensitive:
     command += " --sensitive"
   os.system(command)
-  print( "[Finished identifying and indexing chimeric reads]: %f" % (time.time()-start_time)  )
+  print( "[Finished identifying chimeric reads]: %f" % (time.time()-start_time)  )
 
 
   #Run HMMs, either use default HMMs found in directory or use list of HMMs given by user.
@@ -194,9 +213,21 @@ if __name__ == '__main__':
     other_args_for_merge += " --disable-hmms"
   os.system("python %s/scripts/merge_viral_reads.py --unknown %s/%s.unknown.bam --trans %s/%s.trans.bam --reduced tmp/temp/reduced.csv --map tmp/temp/unmapped.map --output %s/%s.fixed.trans.bam" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, options.output_dir, options.prefix) + other_args_for_merge)
 
-  os.system("samtools sort -m 2G -@ %d %s/%s.fixed.trans.bam > %s/%s.fixed.trans.cs.bam" % (options.cpus, options.output_dir, options.prefix, options.output_dir, options.prefix))
+  os.system("samtools sort -m %s -@ %d %s/%s.fixed.trans.bam > %s/%s.fixed.trans.cs.bam" % (\
+                options.mem,
+                options.cpus,
+                options.output_dir,
+                options.prefix,
+                options.output_dir,
+                options.prefix))
   os.system("samtools index %s/%s.fixed.trans.cs.bam" % (options.output_dir, options.prefix))
-  os.system("samtools sort -m 2G -@ %d %s/%s.viral.bam > %s/%s.viral.cs.bam" % (options.cpus, options.output_dir, options.prefix, options.output_dir, options.prefix))
+  os.system("samtools sort -m %s -@ %d %s/%s.viral.bam > %s/%s.viral.cs.bam" % (\
+                options.mem,
+                options.cpus,
+                options.output_dir,
+                options.prefix,
+                options.output_dir,
+                options.prefix))
   os.system("samtools index %s/%s.viral.cs.bam" % (options.output_dir, options.prefix))
   os.system("python %s/scripts/cluster_trans_new.py --data %s/%s.fixed.trans.cs.bam --output %s/%s.clusters.txt %s --min-support %d" % (options.vifi_dir, options.output_dir, options.prefix, options.output_dir, options.prefix, "" if options.chromosome_list is None else "--chrom %s" % options.chromosome_list, options.min_support))
   print( "[Finished cluster and identify integration points]: %f" % (time.time()-start_time))
