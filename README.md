@@ -56,7 +56,7 @@ echo export AA_DATA_REPO=$PWD/data_repo >> ~/.bashrc
 source ~/.bashrc
 ```
 6. Download the HMM models:
-We have pre-build HMM models for HPV, HBV, HCV and EBV.  They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1VB0qNHRM--CLgZAMmn8sFcNqjzE7QbCn/view?usp=sharing.
+We have pre-build HMM models for HPV, HBV, HCV and EBV.  They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1qHMCbZ9A2HqR_E_ZVv7HksaRIjZjXCZN/view?usp=share_link.
 ```
 tar -zxvf viral_data.tar.gz
 echo export REFERENCE_REPO=$PWD/viral_data >> ~/.bashrc
