@@ -48,7 +48,7 @@ echo export VIFI_DIR=/path/to/ViFi >> ~/.bashrc
 echo export PYTHONPATH=/path/to/ViFi:/path/to/ViFi/src:$PYTHONPATH >> ~/.bashrc
 ```
 5. Download the data repositories:
-While we include some annotations, we are unable to host some large files in the git repository. These may be downloaded from https://drive.google.com/file/d/1XBZbwgcV1n2AWWAyt2RWfSKKxzssRFBo/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
+While we include some annotations, we are unable to host some large files in the git repository. These may be downloaded from [https://drive.google.com/file/d/1XBZbwgcV1n2AWWAyt2RWfSKKxzssRFBo/view?usp=sharing](https://drive.google.com/file/d/1iZQLul9Kor0KwD2sKDh-k3NgqJ0cmIHq/view?usp=share_link). Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
 ```
 tar -zxvf data_repo.tar.gz
 echo "GRCh38" > ./data_repo/reference.txt
@@ -56,7 +56,7 @@ echo export AA_DATA_REPO=$PWD/data_repo >> ~/.bashrc
 source ~/.bashrc
 ```
 6. Download the HMM models:
-We have pre-build HMM models for HPV, HBV, HCV and EBV.  They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1qHMCbZ9A2HqR_E_ZVv7HksaRIjZjXCZN/view?usp=share_link.
+We have pre-build HMM models for HPV, HBV, HCV and EBV.  They are included in the GitHub repository in a compressed format or alternatively can be downloaded from [https://drive.google.com/file/d/1qHMCbZ9A2HqR_E_ZVv7HksaRIjZjXCZN/view?usp=share_link](https://drive.google.com/file/d/1EHH5Ruxod6NJt5GER1a7hkj8ryjEbrdE/view?usp=share_link).
 ```
 tar -zxvf viral_data.tar.gz
 echo export REFERENCE_REPO=$PWD/viral_data >> ~/.bashrc
@@ -220,7 +220,7 @@ echo export VIFI_DIR=/path/to/ViFi >> ~/.bashrc
 echo export PYTHONPATH=/path/to/ViFi:/path/to/ViFi/src:$PYTHONPATH >> ~/.bashrc
 ```
 4. Download the data repositories:
-While we include some annotations, we are unable to host some large files in the git repository.  These may be downloaded from https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing. Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
+While we include some annotations, we are unable to host some large files in the git repository.  These may be downloaded from [https://drive.google.com/file/d/1il10KUxJ5Q5JvR5pHJB4GUMBlBPgTjrj/view?usp=sharing](https://drive.google.com/file/d/1iZQLul9Kor0KwD2sKDh-k3NgqJ0cmIHq/view?usp=share_link). Thanks to Peter Ulz and Shiting Li for noticing incorrect link earlier.
 ```
 tar -zxvf data_repo.tar.gz
 echo "GRCh38" > ./data_repo/reference.txt
@@ -228,7 +228,7 @@ echo export AA_DATA_REPO=$PWD/data_repo >> ~/.bashrc
 source ~/.bashrc
 ```
 5. Download the HMM models:
-We have pre-build HMM models for HPV, HBV, HCV and EBV. They are included in the GitHub repository in a compressed format or alternatively can be downloaded from https://drive.google.com/file/d/1VB0qNHRM--CLgZAMmn8sFcNqjzE7QbCn/view?usp=sharing.
+We have pre-build HMM models for HPV, HBV, HCV and EBV. They are included in the GitHub repository in a compressed format or alternatively can be downloaded from [https://drive.google.com/file/d/1VB0qNHRM--CLgZAMmn8sFcNqjzE7QbCn/view?usp=sharing](https://drive.google.com/file/d/1EHH5Ruxod6NJt5GER1a7hkj8ryjEbrdE/view?usp=share_link).
 ```
 tar -zxvf viral_data.tar.gz
 echo export REFERENCE_REPO=$PWD/viral_data >> ~/.bashrc
